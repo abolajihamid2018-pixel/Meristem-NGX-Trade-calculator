@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Meristem NGX Trade Calculator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+<div class="bg-white w-full max-w-lg p-8 rounded-2xl shadow-xl">
+
+  <div class="text-center mb-6">
+    <h1 class="text-2xl font-bold text-green-700">Meristem NGX Trade Calculator</h1>
+    <p class="text-sm text-gray-500">Calculate your true transaction cost</p>
+  </div>
+
+  <!-- BUY / SELL TOGGLE -->
+  <div class="flex bg-gray-200 rounded-full p-1 mb-6">
+    <button id="buyBtn" onclick="setType('buy')" 
+      class="w-1/2 py-2 rounded-full bg-green-600 text-white font-semibold transition">
+      Buy
+    </button>
+    <button id="sellBtn" onclick="setType('sell')" 
+      class="w-1/2 py-2 rounded-full text-gray-600 font-semibold transition">
+      Sell
+    </button>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="space-y-4">
+    <input id="units" type="number" placeholder="Units"
+      class="w-full border rounded-lg p-3 focus:outline-green-600"/>
+
+    <input id="price" type="number" placeholder="Price per Unit (₦)"
+      class="w-full border rounded-lg p-3 focus:outline-green-600"/>
+
+    <input id="brokerage" type="number" value="1.35" step="0.01"
+      class="w-full border rounded-lg p-3 focus:outline-green-600"/>
+  </div>
+
+  <button onclick="calculate()"
+    class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition">
+    Calculate
+  </button>
+
+  <!-- RESULT -->
+  <div id="result" class="mt-6 text-sm text-gray-700 space-y-1"></div>
+
+  <!-- SIGNATURE -->
+  <div class="mt-8 text-center text-xs text-gray-400">
+    Built for Meristem<br/>
+    By <span class="font-semibold text-green-700">Hammed Abolaji</span>
+  </div>
+
+</div>
+
+<script>
+let tradeType = "buy";
+
+function setType(type) {
+  tradeType = type;
+
+  const buyBtn = document.getElementById("buyBtn");
+  const sellBtn = document.getElementById("sellBtn");
+
+  if(type === "buy") {
+    buyBtn.classList.add("bg-green-600","text-white");
+    sellBtn.classList.remove("bg-green-600","text-white");
+    sellBtn.classList.add("text-gray-600");
+  } else {
+    sellBtn.classList.add("bg-green-600","text-white");
+    buyBtn.classList.remove("bg-green-600","text-white");
+    buyBtn.classList.add("text-gray-600");
+  }
+}
+
+function calculate() {
+
+  const units = parseFloat(document.getElementById("units").value);
+  const price = parseFloat(document.getElementById("price").value);
+  const brokerageRate = parseFloat(document.getElementById("brokerage").value) / 100;
+
+  if(!units || !price) {
+    alert("Please enter units and price");
+    return;
+  }
+
+  const gross = units * price;
+  const brokerage = gross * brokerageRate;
+  const vat = brokerage * 0.075;
+  const sec = gross * 0.003;
+  const cscs = gross * 0.003;
+  const ngx = gross * 0.003;
+  const stamp = tradeType === "buy" ? gross * 0.0008 : 0;
+
+  const totalFees = brokerage + vat + sec + cscs + ngx + stamp;
+
+  const net = tradeType === "buy"
+    ? gross + totalFees
+    : gross - totalFees;
+
+  document.getElementById("result").innerHTML = `
+    <div class="border-t pt-4">
+      <p><strong>Gross Value:</strong> ₦${gross.toLocaleString(undefined,{minimumFractionDigits:2})}</p>
+      <p><strong>Total Fees:</strong> ₦${totalFees.toLocaleString(undefined,{minimumFractionDigits:2})}</p>
+      <p class="text-lg font-bold text-green-700 mt-2">
+        ${tradeType === "buy" ? "Total Payable" : "Net Proceeds"}:
+        ₦${net.toLocaleString(undefined,{minimumFractionDigits:2})}
+      </p>
+    </div>
+  `;
+}
+</script>
+
+</body>
+</html>
